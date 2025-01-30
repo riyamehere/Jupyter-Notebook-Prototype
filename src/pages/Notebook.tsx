@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import FileList from "./components/FileList";
-import FileEditor from "./components/FileEditor";
+import FileList from "../components/FileList";
+import FileEditor from "../components/FileEditor";
 
 const Notebook: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
