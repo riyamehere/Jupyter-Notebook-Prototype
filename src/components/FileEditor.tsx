@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CodeCell from "./CodeCell";
-import { Button } from "@nextui-org/react";
+import {Button} from "@heroui/react";
 
 const FileEditor: React.FC<{ selectedFile: string | null }> = ({
   selectedFile,
@@ -15,8 +15,8 @@ const FileEditor: React.FC<{ selectedFile: string | null }> = ({
 
   return (
     <div className="p-4 w-3/4">
-      <h2 className="text-lg font-semibold">{selectedFile}</h2>
-      <Button onClick={addCell} className="my-2">
+      <h2 className="text-lg font-semibold">{selectedFile}.py</h2>
+      <Button onClick={addCell} className="my-2 bg-blue-200 cursor-pointer rounded-md">
         Add Code Cell
       </Button>
       {cells.map((id) => (

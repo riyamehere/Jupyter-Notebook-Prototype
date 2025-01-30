@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Input, Listbox, ListboxItem } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 
 // Schema validation using Zod
 const fileSchema = z.object({
@@ -26,18 +27,29 @@ const FileList: React.FC<{ onFileSelect: (file: string) => void }> = ({
     <div className="p-4 w-1/4 bg-gray-200 min-h-screen">
       <h2 className="text-lg font-semibold mb-4">Files</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="mb-4">
-        <Input {...register("fileName")} placeholder="Enter file name" className="bg-white rounded-md" />
-        <Button type="submit" className="mt-2 bg-blue-300 cursor-pointer rounded-md">
+        <Input
+          {...register("fileName")}
+          placeholder="Enter file name"
+          className="bg-white rounded-md"
+        />
+        <Button
+          type="submit"
+          className="mt-2 bg-blue-300 cursor-pointer rounded-md"
+        >
           Add File
         </Button>
       </form>
-      <Listbox>
+      <div className="space-y-2">
         {files.map((file, idx) => (
-          <ListboxItem key={idx} onClick={() => onFileSelect(file)}>
+          <div
+            key={idx}
+            onClick={() => onFileSelect(file)}
+            className="p-2 rounded-md cursor-pointer bg-white hover:bg-gray-300 transition duration-200"
+          >
             {file}.py
-          </ListboxItem>
+          </div>
         ))}
-      </Listbox>
+      </div>
     </div>
   );
 };
