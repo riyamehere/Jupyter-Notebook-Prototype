@@ -8,12 +8,12 @@ const CodeCell: React.FC = () => {
   const [output, setOutput] = useState("");
 
   const handleRun = async () => {
-    // try {
-    //   const result = await executePythonCode(code);
-    //   setOutput(result);
-    // } catch (error) {
-    //   setOutput("Error executing code.");
-    // }
+    try {
+      const result = await executePythonCode(code);
+      setOutput(result);
+    } catch (error) {
+      setOutput("Error executing code.");
+    }
     console.log('hey')
   };
 
