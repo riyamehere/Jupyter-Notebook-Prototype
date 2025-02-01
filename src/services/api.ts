@@ -2,39 +2,81 @@ const JUPYTER_BASE_URL = "http://localhost:8000";
 const API_TOKEN = import.meta.env.VITE_API_TOKEN; // Replace with your generated token
 
 export const executePythonCode = async (code: string) => {
-  const response = await fetch(`${JUPYTER_BASE_URL}/user/admin/api/kernels`, {
-    method: "GET",
+  // Step 1: Create a kernel
+
+  const kernelResponse = await fetch(`${JUPYTER_BASE_URL}/user/admin/api/kernels`, {
+    method: "POST", // Change to POST method
     headers: {
+      "Authorization": `token ${API_TOKEN}`,
       "Content-Type": "application/json",
-      Authorization: `token ${API_TOKEN}`,
     },
+    body: JSON.stringify({
+      // Add the appropriate body for creating a new kernel
+      // Example body (change as needed based on your JupyterHub API's requirements)
+      "name": "python3", // You can modify the kernel name or any other required fields
+      "kernel_spec": {
+        // Any kernel-specific options here
+      }
+    }),
+});
+
+  const kernelData = await kernelResponse.json();
+  const kernelId = kernelData.id;
+
+  // Step 2: Open WebSocket connection to kernel
+  const wsUrl = `${JUPYTER_BASE_URL}/user/admin/api/kernels/${kernelId}/channels`;
+  const ws = new WebSocket(wsUrl);
+
+  return new Promise((resolve, reject) => {
+    ws.onopen = () => {
+      // Step 3: Send execute request through WebSocket
+      const executeRequest = {
+        header: {
+          msg_id: "execute_request",
+          username: "admin",
+          session: kernelId,
+          msg_type: "execute_request",
+        },
+        content: {
+          code,
+          silent: false,
+          store_history: true,
+          user_expressions: {},
+          allow_stdin: false,
+        },
+        metadata: {},
+        parent_header: {},
+      };
+
+      // Send code execution request to kernel
+      ws.send(JSON.stringify(executeRequest));
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      // Look for "execute_reply" message type
+      if (message.header.msg_type === "execute_reply") {
+        if (message.content.status === "ok") {
+          // Execution successful
+          resolve(message.content);
+        } else {
+          // Execution failed
+          reject("Execution failed");
+        }
+
+        // Close WebSocket connection after execution
+        ws.close();
+      }
+    };
+
+    ws.onerror = (error) => {
+      reject(error);
+      ws.close();
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
   });
-
-  const { id: kernelId } = await response.json();
-
-  const executeRequest = {
-    code,
-    silent: false,
-    store_history: true,
-    user_expressions: {},
-    allow_stdin: false,
-  };
-
-  await fetch(`${JUPYTER_BASE_URL}/hub/user/admin/api/kernels/${kernelId}/channels`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `token ${API_TOKEN}`,
-    },
-    body: JSON.stringify(executeRequest),
-  });
-
-  const result = await fetch(`${JUPYTER_BASE_URL}/hub/user/admin/api/kernels/${kernelId}/execute_reply`, {
-    headers: {
-      Authorization: `token ${API_TOKEN}`,
-    },
-  });
-
-  const output = await result.json();
-  return output.content.execution_state === "idle" ? output.content.status : "Execution failed";
 };
