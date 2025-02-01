@@ -19,9 +19,10 @@ export const executePythonCode = async (code: string) => {
       }
     }),
 });
+const kernelData = await kernelResponse.json();
+const kernelId = kernelData.id;
 
-  const kernelData = await kernelResponse.json();
-  const kernelId = kernelData.id;
+console.log(kernelId)
 
   // Step 2: Open WebSocket connection to kernel
   const wsUrl = `${JUPYTER_BASE_URL}/user/admin/api/kernels/${kernelId}/channels`;
