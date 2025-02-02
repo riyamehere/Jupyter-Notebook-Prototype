@@ -14,9 +14,6 @@ export const executePythonCode = async (code: string) => {
       // Add the appropriate body for creating a new kernel
       // Example body (change as needed based on your JupyterHub API's requirements)
       "name": "python3", // You can modify the kernel name or any other required fields
-      "kernel_spec": {
-        // Any kernel-specific options here
-      }
     }),
 });
 const kernelData = await kernelResponse.json();
