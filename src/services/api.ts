@@ -11,8 +11,6 @@ export const executePythonCode = async (code: string) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      // Add the appropriate body for creating a new kernel
-      // Example body (change as needed based on your JupyterHub API's requirements)
       "name": "python3", // You can modify the kernel name or any other required fields
     }),
 });
