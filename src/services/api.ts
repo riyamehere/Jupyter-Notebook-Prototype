@@ -61,7 +61,6 @@ console.log(kernelId)
           reject("Execution failed");
         }
 
-        // Close WebSocket connection after execution
         ws.close();
       }
     };
