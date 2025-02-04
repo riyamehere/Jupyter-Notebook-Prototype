@@ -11,7 +11,7 @@ export const executePythonCode = async (code: string) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      "name": "python3", // You can modify the kernel name or any other required fields
+      "name": "python3", 
     }),
 });
 const kernelData = await kernelResponse.json();
