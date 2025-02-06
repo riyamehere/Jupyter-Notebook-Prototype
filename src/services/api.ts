@@ -51,7 +51,6 @@ console.log(kernelId)
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
 
-      // Look for "execute_reply" message type
       if (message.header.msg_type === "execute_reply") {
         if (message.content.status === "ok") {
           // Execution successful
