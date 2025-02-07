@@ -1,76 +1,79 @@
 const JUPYTER_BASE_URL = "http://localhost:8000";
-const API_TOKEN = import.meta.env.VITE_API_TOKEN; // Replace with your generated token
+const API_TOKEN = import.meta.env.VITE_API_TOKEN; // Ensure this is set in .env
 
 export const executePythonCode = async (code: string) => {
-  // Step 1: Create a kernel
+  try {
+    // Step 1: Create a new kernel
+    const kernelResponse = await fetch(`${JUPYTER_BASE_URL}/user/admin/api/kernels`, {
+      method: "POST",
+      headers: {
+        "Authorization": `token ${API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: "python3" }),
+    });
 
-  const kernelResponse = await fetch(`${JUPYTER_BASE_URL}/user/admin/api/kernels`, {
-    method: "POST", // Change to POST method
-    headers: {
-      "Authorization": `token ${API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      "name": "python3", 
-    }),
-});
-const kernelData = await kernelResponse.json();
-const kernelId = kernelData.id;
+    if (!kernelResponse.ok) throw new Error("Failed to create kernel");
 
-console.log(kernelId)
+    const kernelData = await kernelResponse.json();
+    const kernelId = kernelData.id;
 
-  // Step 2: Open WebSocket connection to kernel
-  const wsUrl = `${JUPYTER_BASE_URL}/user/admin/api/kernels/${kernelId}/channels`;
-  const ws = new WebSocket(wsUrl);
+    console.log("Kernel Created:", kernelId);
 
-  return new Promise((resolve, reject) => {
-    ws.onopen = () => {
-      // Step 3: Send execute request through WebSocket
-      const executeRequest = {
-        header: {
-          msg_id: "execute_request",
-          username: "admin",
-          session: kernelId,
-          msg_type: "execute_request",
-        },
-        content: {
-          code,
-          silent: false,
-          store_history: true,
-          user_expressions: {},
-          allow_stdin: false,
-        },
-        metadata: {},
-        parent_header: {},
+    // Step 2: Open WebSocket connection
+    const wsUrl = `${JUPYTER_BASE_URL.replace("http", "ws")}/user/admin/api/kernels/${kernelId}/channels?token=${API_TOKEN}`;
+    const ws = new WebSocket(wsUrl);
+
+    return new Promise((resolve, reject) => {
+      ws.onopen = () => {
+        console.log("WebSocket Connected");
+
+        // Step 3: Send execute request
+        const executeRequest = {
+          header: {
+            msg_id: `msg_${Date.now()}`, // Unique ID
+            username: "admin",
+            session: kernelId,
+            msg_type: "execute_request",
+            version: "5.3",
+          },
+          parent_header: {},
+          metadata: {},
+          content: {
+            code,
+            silent: false,
+            store_history: true,
+            user_expressions: {},
+            allow_stdin: false,
+          },
+        };
+
+        ws.send(JSON.stringify(executeRequest));
       };
 
-      // Send code execution request to kernel
-      ws.send(JSON.stringify(executeRequest));
-    };
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
 
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-
-      if (message.header.msg_type === "execute_reply") {
-        if (message.content.status === "ok") {
-          // Execution successful
-          resolve(message.content);
-        } else {
-          // Execution failed
-          reject("Execution failed");
+        if (message.msg_type === "error") {
+          reject(`Error: ${message.content.ename} - ${message.content.evalue}`);
+          ws.close();
+        } else if (message.msg_type === "execute_result" || message.msg_type === "stream") {
+          resolve(message.content.text || message.content.data["text/plain"]);
+          ws.close();
         }
+      };
 
+      ws.onerror = (error) => {
+        reject(`WebSocket Error: ${error}`);
         ws.close();
-      }
-    };
+      };
 
-    ws.onerror = (error) => {
-      reject(error);
-      ws.close();
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-  });
+      ws.onclose = () => {
+        console.log("WebSocket Disconnected");
+      };
+    });
+  } catch (error) {
+    console.error("Execution Error:", error);
+    throw error;
+  }
 };
