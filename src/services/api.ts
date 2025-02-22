@@ -28,7 +28,6 @@ export const executePythonCode = async (code: string) => {
 
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
-        console.log("WebSocket Connected");
 
         // Step 3: Send execute request
         const executeRequest = {
