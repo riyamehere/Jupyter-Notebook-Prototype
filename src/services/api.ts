@@ -29,7 +29,6 @@ export const executePythonCode = async (code: string) => {
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
 
-        // Step 3: Send execute request
         const executeRequest = {
           header: {
             msg_id: `msg_${Date.now()}`, // Unique ID
