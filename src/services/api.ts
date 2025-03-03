@@ -7,7 +7,6 @@ export const executePythonCode = async (code: string) => {
     // curl -X POST -H "Authorization: token " \
     //  -H "Content-Type: application/json" \
     //  -d '{"name": "python3"}' \
-    //  http://localhost:8000/user/admin/api/kernels
     const kernelResponse = await fetch(`${JUPYTER_BASE_URL}/user/admin/api/kernels`, {
       method: "POST",
       headers: {
