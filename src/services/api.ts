@@ -5,7 +5,6 @@ export const executePythonCode = async (code: string) => {
   try {
     // Step 1: Create a new kernel
     // curl -X POST -H "Authorization: token " \
-    //  -H "Content-Type: application/json" \
     const kernelResponse = await fetch(`${JUPYTER_BASE_URL}/user/admin/api/kernels`, {
       method: "POST",
       headers: {
