@@ -4,7 +4,6 @@ const API_TOKEN = import.meta.env.VITE_API_TOKEN; // Ensure this is set in .env
 export const executePythonCode = async (code: string) => {
   try {
     // Step 1: Create a new kernel
-    // curl -X POST -H "Authorization: token " \
     const kernelResponse = await fetch(`${JUPYTER_BASE_URL}/user/admin/api/kernels`, {
       method: "POST",
       headers: {
