@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 
-// Schema validation using Zod
 const fileSchema = z.object({
   fileName: z.string().min(1, "File name is required"),
 });
