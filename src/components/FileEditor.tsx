@@ -5,6 +5,7 @@ import {Button} from "@heroui/react";
 const FileEditor: React.FC<{ selectedFile: string | null }> = ({
   selectedFile,
 }) => {
+  //cell state
   const [cells, setCells] = useState<number[]>([]);
 
   if (!selectedFile) return <div className="p-4">Select a file to start coding.</div>;
